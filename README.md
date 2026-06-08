@@ -1,6 +1,6 @@
 ## Migratory
 
-Simple migrations tool for python projects that use PostgreSQL.
+Simple migrations tool for projects that use PostgreSQL.
 
 
 ### Inspiration
