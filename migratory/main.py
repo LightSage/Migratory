@@ -47,12 +47,13 @@ class PYRevision(Revision):
 
 class Migrator:
     """The main class for Migratory."""
-    __slots__ = ("root", "revisions", "config")
+    __slots__ = ("root", "revisions", "config", "root_config")
 
     def __init__(self) -> None:
         self.root = Path("migrations")
         self.revisions = self.load_migrations()
         self.config = self.load_config()
+        self.root_config = Path("migratory.json")
 
     def load_migrations(self):
         fps: List[Revision] = []
@@ -69,13 +70,13 @@ class Migrator:
 
     def load_config(self) -> MigratoryConfig:
         try:
-            with open(self.root.parent / "migratory.json", mode="r", encoding="utf-8") as fp:
+            with self.root_config.open(mode="r", encoding="utf-8") as fp:
                 return json.load(fp)
         except FileNotFoundError:
             raise Exception("Configuration file not found! Please run `migratory init` first.")
 
     def save(self):
-        with open(self.root.parent / "migratory.json", mode="w", encoding="utf-8") as fp:
+        with self.root_config.open(mode="w", encoding="utf-8") as fp:
             json.dump(self.config, fp, sort_keys=True)
 
     async def apply_revisions(self, conn: asyncpg.Connection):
@@ -191,8 +192,7 @@ async def upgrade(sql: Optional[bool] = typer.Option(False,
 
 
 @parser.command(name='log')
-@run_async
-async def display_log():
+def display_log():
     """Displays what migrations are pending and are applied"""
     m = Migrator()
 
